@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./deploy/app.Dockerfile
+    restart: always
+    env_file:
+      - ./src/.env
+    expose:
+      - "8000"
+    depends_on:
+      - db
+      - redis
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./deploy/nginx.Dockerfile
+    restart: always
+    env_file:
+      - ./src/.env
+    expose:
+      - "80"
+    ports:
+      - "8000:80"
+    depends_on:
+      - app
+
+  db:
+    image: mongo:latest
+    restart: always
+    env_file:
+      - ./src/.env
+    expose:
+      - "27017"
+
+  redis:
+    image: redis:6-alpine
+    restart: unless-stopped
+    expose:
+      - "6379"
